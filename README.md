@@ -1,2 +1,2 @@
-# F5-2.01
+# Bohdan-Konyshan-F5-2.01
 pract1
