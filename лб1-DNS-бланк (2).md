@@ -48,16 +48,22 @@
 
 | № | Ім'я, що запитується в DNS | Заголовок `Host` | Ціль запиту (request target) |
 |---|---|---|---|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
+| 1 |www.cs-201-11.lab |www.cs-201-11.lab |/archive/items?page=5&limit=uk |
+| 2 |app.cs-201-11.lab | app.cs-201-11.lab|/items/?page=%D0%BA%D0%B8%D1%97%D0%B2 |
+| 3 |test.cs-201-11.lab | test.cs-201-11.lab|/archive |
+| 4 |www.cs-201-11.lab |www.cs-201-11.lab:8443 |/archive/../items |
+| 5 | -|- |- |
 
 Декодоване значення параметра URI 2:
-
+```text
+Київ
+%D0%BA - літера к
+%D0%B8 - літера и
+%D1%97 - літера ї
+%D0%B2 - літера в
+```
 Чому URI 5 не має складової host, хоча містить символ `@`:
-
+Символ @ виступає синтаксичним розділювачем імені поштової скриньки та домену всередині самої email-адреси, а не розділювачем userinfo та host, тому складова host у цього URI відсутня.
 ### 1.2. Перевірка (після завдання 3)
 
 <!-- Для URI 1–3: рядки запиту (починаються з ">") і тіло відповіді сервера. -->
@@ -88,14 +94,91 @@ URI 4: етап, на якому запит не вдається (пошук і
 ## Завдання 2. Проходження ієрархії вручну
 
 ```text
+Команда 1:
+dig @10.53.0.2 ns.cs-201-11.lab A +norec
 
+; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.0.2 ns.cs-201-11.lab A +norec
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 42917
+;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 2
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 579f7c791d6e2886010000006ae71aef095c318de8495be4 (good)
+;; QUESTION SECTION:
+;ns.cs-201-11.lab.              IN      A
+
+;; AUTHORITY SECTION:
+lab.                    172800  IN      NS      ns1.nic.lab.
+
+;; ADDITIONAL SECTION:
+ns1.nic.lab.            172800  IN      A       10.53.0.3
+
+;; Query time: 81 msec
+;; SERVER: 10.53.0.2#53(10.53.0.2) (UDP)
+;; WHEN: Sun Nov 01 10:56:47 UTC 2026
+;; MSG SIZE  rcvd: 117
+Команда 2:
+dig @10.53.0.3 ns.cs-201-11.lab A +norec
+
+; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.0.3 ns.cs-201-11.lab A +norec
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 1888
+;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 2
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: dbcf09e527b539fd010000006ae71afc97c879d4b872b0d8 (good)
+;; QUESTION SECTION:
+;ns.cs-201-11.lab.              IN      A
+
+;; AUTHORITY SECTION:
+cs-201-11.lab.          3600    IN      NS      ns.cs-201-11.lab.
+
+;; ADDITIONAL SECTION:
+ns.cs-201-11.lab.       3600    IN      A       10.53.1.1
+
+;; Query time: 81 msec
+;; SERVER: 10.53.0.3#53(10.53.0.3) (UDP)
+;; WHEN: Sun Nov 01 10:57:00 UTC 2026
+;; MSG SIZE  rcvd: 103
+Команда 3:
+dig @10.53.1.1 ns.cs-201-11.lab A +norec
+
+; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.1.1 ns.cs-201-11.lab A +norec
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 21587
+;; flags: qr aa; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 8c6483a4a4bd9d49010000006ae71b11830201abeeb63df2 (good)
+;; QUESTION SECTION:
+;ns.cs-201-11.lab.              IN      A
+
+;; ANSWER SECTION:
+ns.cs-201-11.lab.       45      IN      A       10.53.1.1
+
+;; AUTHORITY SECTION:
+cs-201-11.lab.          45      IN      NS      ns.cs-201-11.lab.
+
+;; Query time: 0 msec
+;; SERVER: 10.53.1.1#53(10.53.1.1) (UDP)
+;; WHEN: Sun Nov 01 10:57:21 UTC 2026
+;; MSG SIZE  rcvd: 103
 ```
 
 | Сервер | status | flags | ANSWER | AUTHORITY | ADDITIONAL |
 |---|---|---|---|---|---|
-| 10.53.0.2 | | | | | |
-| 10.53.0.3 | | | | | |
-| 10.53.1.1 | | | | | |
+| 10.53.0.2 |NOERROR |qr |0|lab. 172800 IN NS ns1.nic.lab. |ns1.nic.lab. 172800 IN A 10.53.0.3 |
+| 10.53.0.3 |NOERROR |qr | 0|cs-201-11.lab. 3600 IN NS ns.cs-201-11.lab. |ns.cs-201-11.lab. 3600 IN A 10.53.1.1 |
+| 10.53.1.1 |NOERROR |qraa |1 ns.cs-201-11.lab |cs-201-11.lab. 45 IN NS ns.cs-201-11.lab. |- |
 
 Вивід `dig ns.sNN.lab A +trace`:
 
