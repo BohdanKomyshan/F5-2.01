@@ -14,8 +14,8 @@
 | Група |F5-2.01 |
 | Ідентифікатор (`sNN`) |cs-201-11 |
 | Дата виконання | |
-| Середовище | <!-- GitHub Codespaces або інше; якщо інше, вказати яке --> |
-| Версія `dig` | <!-- перший рядок виводу команди dig -v у терміналі стенда --> |
+| Середовище | GitHub Codespaces |
+| Версія `dig` |9.18.39-0ubuntu0.24.04.8-Ubuntu |
 
 ## Параметри варіанта
 
@@ -40,11 +40,11 @@
 
 | № | scheme | userinfo | host | port | path | query | fragment |
 |---|---|---|---|---|---|---|---|
-| 1 | | | | | | | |
-| 2 | | | | | | | |
-| 3 | | | | | | | |
-| 4 | | | | | | | |
-| 5 | | | | | | | |
+| 1 |http |- |www.cs-201-11.lab |80 (за замовч.) |/archive/items |summary | |
+| 2 |http |- |app.cs-201-11.lab |80 |/items/ | -| |
+| 3 | http|user:pass |test.cs-201-11.lab |80 (за замовч.) |/archive |summary | |
+| 4 | http|- | www.cs-201-11.lab|8443 | /archive/../items|- | |
+| 5 |mailto |- |- |- |subject=archive |- | |
 
 | № | Ім'я, що запитується в DNS | Заголовок `Host` | Ціль запиту (request target) |
 |---|---|---|---|
