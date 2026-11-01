@@ -40,11 +40,11 @@
 
 | № | scheme | userinfo | host | port | path | query | fragment |
 |---|---|---|---|---|---|---|---|
-| 1 |http |- |www.cs-201-11.lab |80 (за замовч.) |/archive/items |summary | |
-| 2 |http |- |app.cs-201-11.lab |80 |/items/ | -| |
-| 3 | http|user:pass |test.cs-201-11.lab |80 (за замовч.) |/archive |summary | |
-| 4 | http|- | www.cs-201-11.lab|8443 | /archive/../items|- | |
-| 5 |mailto |- |- |- |subject=archive |- | |
+| 1 |http |- |www.cs-201-11.lab |80 (за замовч.) |/archive/items |page=5&limit=uk |summary |
+| 2 |http |- |app.cs-201-11.lab |80 |/items/ | page=%D0%BA%D0%B8%D1%97%D0%B2|- |
+| 3 | http|user:pass |test.cs-201-11.lab |80 (за замовч.) |/archive |-|comments |
+| 4 | http|- | www.cs-201-11.lab|8443 | /archive/../items|- |- |
+| 5 |mailto |- |- |- |admin@cs-201-11.lab|subject=archive |- |
 
 | № | Ім'я, що запитується в DNS | Заголовок `Host` | Ціль запиту (request target) |
 |---|---|---|---|
