@@ -397,23 +397,37 @@ zone reload queued
 
 | Ім'я | Перший запит | Повторний запит |
 |---|---|---|
-| A: нове ім'я у власній зоні | | |
-| B: нове ім'я в зоні `lab.` | | |
-| C: ім'я в неіснуючому TLD | | |
-| D: `www.sNN.lab` після перезапуску резолвера | | |
+| A: нове ім'я у власній зоні |Тільки власний сервер |з кешу |
+| B: нове ім'я в зоні `lab.` |Сервер TLD | з кешу|
+| C: ім'я в неіснуючому TLD |Кореневий сервер root |з кешу |
+| D: `www.sNN.lab` після перезапуску резолвера | Root → TLD → власний сервер.|з кешу |
 
 Вивід вимірювань:
 
 ```text
+root@ns-cs-201-11:/# dig $A | grep 'Query time'; dig $A | grep 'Query time'
+;; Query time: 1 msec
+;; Query time: 0 msec
 
+root@ns-cs-201-11:/# dig $B | grep 'Query time'; dig $B | grep 'Query time'
+;; Query time: 40 msec
+;; Query time: 0 msec
+
+root@ns-cs-201-11:/# dig $C | grep 'Query time'; dig $C | grep 'Query time'
+;; Query time: 80 msec
+;; Query time: 0 msec
+
+root@ns-cs-201-11:/# dig www.cs-201-11.lab | grep 'Query time'; dig www.cs-201-11.lab | grep 'Query time'
+;; Query time: 402 msec
+;; Query time: 0 msec
 ```
 
 | Ім'я | Перший запит, мс | Повторний, мс | Сервери, до яких звернувся резолвер (за журналами) |
 |---|---|---|---|
-| A | | | |
-| B | | | |
-| C | | | |
-| D | | | |
+| A |1 |0 |Власний сервер (10.53.1.1) |
+| B |40 |0 |TLD (10.53.0.3) |
+| C | 80| 0|Root (10.53.0.2) |
+| D |402 | 0|Root (10.53.0.2), TLD (10.53.0.3), Власний (10.53.1.1) | 
 
 Значення `time_namelookup` з `curl` після перезапуску резолвера:
 
