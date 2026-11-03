@@ -69,25 +69,79 @@
 <!-- Для URI 1–3: рядки запиту (починаються з ">") і тіло відповіді сервера. -->
 
 ```text
+URI 1:
 
+> GET /archive/items?page=5&limit=uk HTTP/1.1
+> Host: www.cs-201-11.lab
+
+< HTTP/1.1 200 OK
+
+server: web-b
+Host: www.cs-201-11.lab
+request URI: /archive/items?page=5&limit=uk
+path: /archive/items
+query: page=5&limit=uk
+client: 10.53.1.1
+
+URI 2:
+
+> GET /items/?page=%D0%BA%D0%B8%D1%97%D0%B2 HTTP/1.1
+> Host: app.cs-201-11.lab
+
+< HTTP/1.1 200 OK
+
+server: web-b
+Host: app.cs-201-11.lab
+request URI: /items/?page=%D0%BA%D0%B8%D1%97%D0%B2
+path: /items/
+query: page=%D0%BA%D0%B8%D1%97%D0%B2
+client: 10.53.1.1
+
+URI 3:
+
+> GET /archive HTTP/1.1
+> Host: test.cs-201-11.lab
+> Authorization: Basic dXNlcjpwYXNz
+
+< HTTP/1.1 200 OK
+
+server: web-b
+Host: test.cs-201-11.lab
+request URI: /archive
+path: /archive
+query:
+client: 10.53.1.1
 ```
 
 Значення заголовка `Authorization` і результат декодування:
 
 ```text
+Значення заголовка Authorization: Basic dXNlcjpwYXNz
 
+Команда декодування:
+echo 'dXNlcjpwYXNz' | base64 -d
+
+Результат декодування:
+user:pass
 ```
 
 URI 4: етап, на якому запит не вдається (пошук імені / TCP / TLS), і рядки виводу, що це підтверджують:
 
 ```text
-
+* Host www.cs-201-11.lab:8443 was resolved.
+* IPv6: (none)
+* IPv4: 10.53.0.81
+*   Trying 10.53.0.81:8443...
+* connect to 10.53.0.81 port 8443 from 10.53.1.1 port 36124 failed: Connection refused
+* Failed to connect to www.cs-201-11.lab port 8443 after 1 ms: Couldn't connect to server
+* Closing connection
+curl: (7) Failed to connect to www.cs-201-11.lab port 8443 after 1 ms: Couldn't connect to server
 ```
 
 | Запит | `request URI`, отриманий сервером | `path`, отриманий сервером |
 |---|---|---|
-| звичайний | | |
-| `--path-as-is` | | |
+| звичайний |/items |/items |
+| `--path-as-is` |/archive/../items | /items|
 
 Розбіжності між URI та тим, що отримав сервер, і їх пояснення:
 
