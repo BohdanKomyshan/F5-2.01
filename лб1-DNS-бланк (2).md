@@ -323,11 +323,17 @@ server: web-b
 ## Завдання 5. Негативне кешування
 
 **Прогноз** (записати до вимірювання). Формула за RFC 2308 і розраховане значення:
-
+TTL_negative = min(SOA TTL, SOA minimum)
+TTL_negative = min(60,30) = 30 с
 Перевірка, що сервер до `zone-reload` повертає `NXDOMAIN`:
 
 ```text
+root@ns-cs-201-11:/# dig @10.53.1.1 new-967b5d.cs-201-11.lab +norec
+;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 47533
+;; flags: qr aa; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
 
+;; AUTHORITY SECTION:
+cs-201-11.lab.          30      IN      SOA     ns.cs-201-11.lab. admin.cs-201-11.lab. 2026102808 3600 600 86400 30
 ```
 
 Запит через resolver-a (крок 3), час `zone-reload` (крок 4), перевірка на сервері (крок 5):
