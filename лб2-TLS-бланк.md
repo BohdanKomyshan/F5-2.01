@@ -9,12 +9,12 @@
 
 | Поле | Значення |
 |---|---|
-| ПІБ | |
-| Група | |
-| Ідентифікатор | |
+| ПІБ |Комишан Богдан Васильович |
+| Група |2.01 F5 |
+| Ідентифікатор |cs-201-11 |
 | Дата виконання | |
-| Середовище | <!-- GitHub Codespaces або інше; якщо інше, вказати яке --> |
-| Версія OpenSSL | <!-- вивід openssl version у терміналі стенда --> |
+| Середовище | GitHub Codespaces|
+| Версія OpenSSL | OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024) |
 
 ## Параметри варіанта
 
@@ -22,9 +22,9 @@
 
 | Параметр | Значення |
 |---|---|
-| Віддалений сервер | |
-| Імена для сертифіката | |
-| Ваш сервер (IP) | |
+| Віддалений сервер |cdn.cs-201-11.lab |
+| Імена для сертифіката |www.cs-201-11.lab, status.cs-201-11.lab |
+| Ваш сервер (IP) |10.53.1.1 |
 
 <!-- Якщо стенд перезапускався під час роботи, вказати, після якого завдання. -->
 
@@ -33,28 +33,57 @@
 Вивід кроку 1.1:
 
 ```text
-
+[1] 37
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+server: web
+Host: cdn.cs-201-11.lab
+SNI: 
+protocol: HTTP/1.1 
+client: 10.53.1.1
+10 packets captured
+10 packets received by filter
+0 packets dropped by kernel
+[1]+  Exit 124                timeout 8 tcpdump -ni eth0 -A -s0 -l 'host 10.53.0.80 and tcp port 80' > t1-http.txt
+07:02:26.497255 IP 10.53.1.1.45306 > 10.53.0.80.80: Flags [P.], seq 1:81, ack 1, win 502, options [nop,nop,TS val 2740104880 ecr 4095892667], length 80: HTTP: GET / HTTP/1.1
+.R..."\.GET / HTTP/1.1
+Host: cdn.cs-201-11.lab
+server: web
+Host: cdn.cs-201-11.lab
 ```
 
 Вивід кроку 1.2:
 
 ```text
-
+[1] 43
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+server: web
+Host: cdn.cs-201-11.lab
+SNI: cdn.cs-201-11.lab
+protocol: HTTP/2.0 TLSv1.3
+client: 10.53.1.1
+21 packets captured
+21 packets received by filter
+0 packets dropped by kernel
+[1]+  Exit 124                timeout 8 tcpdump -ni eth0 -A -s0 -l 'host 10.53.0.80 and tcp port 443' > t1-https.txt
+0
+1
 ```
 
 | Що шукали в дампі | HTTP | HTTPS |
 |---|---|---|
-| рядок запиту `GET /` | | |
-| заголовок `Host` | | |
-| тіло відповіді (`server: web`) | | |
-| ім'я віддаленого сервера (кількість входжень) | | |
+| рядок запиту `GET /` |GET / HTTP/1.1 | 0 |
+| заголовок `Host` |Host: cdn.cs-201-11.lab | 0 |
+| тіло відповіді (`server: web`) |server: web | 0|
+| ім'я віддаленого сервера (кількість входжень) |1 |1 |
 
 1. У якому повідомленні і в якому полі передається ім'я сервера, яке видно в дампі HTTPS?
-
+Ім'я сервера передається у першому повідомленні рукостискання TLS — ClientHello (яке ще не зашифроване), у розширенні SNI (Server Name Indication), поле server_name.
 2. Чому рядок `SNI:` у відповіді сервера порожній для HTTP і заповнений для HTTPS?
-
+У звичайному HTTP протокол TLS не використовується, тому рукостискання не відбувається і розширення SNI відсутнє (ім'я сервера передається лише в HTTP-заголовку Host:). У HTTPS перед обміном HTTP-даними встановлюється TLS-з'єднання, під час якого клієнт передає ім'я хоста в розширенні SNI, щоб сервер знав, який саме сертифікат надати.
 3. Рядок `protocol:` показує HTTP/1.1 для запиту по HTTP і HTTP/2.0 для запиту по HTTPS, хоча обидва запити виконано однією командою `curl` без додаткових ключів. Що визначило версію HTTP у другому випадку?
-
+Версію протоколу визначило розширення ALPN (Application-Layer Protocol Negotiation) під час рукостискання TLS. Клієнт (curl) у ClientHello запропонував список підтримуваних протоколів (h2, http/1.1), а сервер обрав і підтвердив використання h2 (HTTP/2.0) (у звичайному HTTP без TLS узгодження через ALPN неможливе, тому використовується HTTP/1.1).
 ## Завдання 2. Рукостискання по записах
 
 Вивід кроку 2.1 (TLS 1.3):
