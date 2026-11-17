@@ -172,8 +172,17 @@ Sent Record
 <!-- Один рядок на кожен запис з виводу 2.1, у тому самому порядку. Напрям: К→С або С→К. -->
 
 | № | Напрям | `Content Type` | `Inner Content Type` | Повідомлення | `Length` |
-|---|---|---|---|---|---|
-| 1 | | | | | |
+| --- | --- | --- | --- | --- | --- |
+| 1 | К→С | Handshake (22) | — | ClientHello | 328 |
+| 2 | С→К | Handshake (22) | — | ServerHello | 118 |
+| 3 | С→К | ChangeCipherSpec (20) | — | — | — |
+| 4 | С→К | ApplicationData (23) | Handshake (22) | EncryptedExtensions | 15 |
+| 5 | С→К | ApplicationData (23) | Handshake (22) | Certificate | 983 |
+| 6 | С→К | ApplicationData (23) | Handshake (22) | CertificateVerify | 74 |
+| 7 | С→К | ApplicationData (23) | Handshake (22) | Finished | 48 |
+| 8 | К→С | ChangeCipherSpec (20) | — | — | — |
+| 9 | К→С | ApplicationData (23) | Handshake (22) | Finished | 48 |
+| 10 | К→С | ApplicationData (23) | Alert (21) | — | — |
 
 Вивід кроків 2.3 і 2.4:
 
