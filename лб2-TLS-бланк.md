@@ -89,13 +89,84 @@ client: 10.53.1.1
 Вивід кроку 2.1 (TLS 1.3):
 
 ```text
-
+Sent Record
+  Content Type = Handshake (22)
+    ClientHello, Length=328
+Received Record
+  Content Type = Handshake (22)
+    ServerHello, Length=118
+Received Record
+  Content Type = ChangeCipherSpec (20)
+Received Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    EncryptedExtensions, Length=15
+Received Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    Certificate, Length=983
+Received Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    CertificateVerify, Length=74
+Received Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    Finished, Length=48
+Sent Record
+  Content Type = ChangeCipherSpec (20)
+Sent Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    Finished, Length=48
+Sent Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Alert (21)
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+ALPN protocol: h2
+Verify return code: 0 (ok)
 ```
 
 Вивід кроку 2.2 (TLS 1.2):
 
 ```text
-
+Sent Record
+  Content Type = Handshake (22)
+    ClientHello, Length=223
+Received Record
+  Content Type = Handshake (22)
+    ServerHello, Length=74
+Received Record
+  Content Type = Handshake (22)
+    Certificate, Length=978
+Received Record
+  Content Type = Handshake (22)
+    ServerKeyExchange, Length=111
+Received Record
+  Content Type = Handshake (22)
+    ServerHelloDone, Length=0
+Sent Record
+  Content Type = Handshake (22)
+    ClientKeyExchange, Length=33
+Sent Record
+  Content Type = ChangeCipherSpec (20)
+Sent Record
+  Content Type = Handshake (22)
+    Finished, Length=12
+Received Record
+  Content Type = Handshake (22)
+    NewSessionTicket, Length=214
+Received Record
+  Content Type = ChangeCipherSpec (20)
+Received Record
+  Content Type = Handshake (22)
+    Finished, Length=12
+New, TLSv1.2, Cipher is ECDHE-ECDSA-AES256-GCM-SHA384
+ALPN protocol: h2
+Received Record
+  Content Type = ApplicationData (23)
+Sent Record
+  Content Type = Alert (21)
 ```
 
 <!-- Один рядок на кожен запис з виводу 2.1, у тому самому порядку. Напрям: К→С або С→К. -->
@@ -107,6 +178,28 @@ client: 10.53.1.1
 Вивід кроків 2.3 і 2.4:
 
 ```text
+2.3
+ extension_type=server_name(0), length=22
+          0000 - 00 14 00 00 11 63 64 6e-2e 63 73 2d 32 30 31   .....cdn.cs-201
+          000f - 2d 31 31 2e 6c 61 62                           -11.lab
+        extension_type=ec_point_formats(11), length=4
+[1] 65
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+22 packets captured
+22 packets received by filter
+0 packets dropped by kernel
+[1]+  Exit 124                timeout 4 tcpdump -ni eth0 -A -s0 -l 'host 10.53.0.80 and tcp port 443' > t2-dump-1.3.txt
+TLS 1.3: 0
+[1] 71
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+21 packets captured
+21 packets received by filter
+0 packets dropped by kernel
+[1]+  Exit 124                timeout 4 tcpdump -ni eth0 -A -s0 -l 'host 10.53.0.80 and tcp port 443' > t2-dump-1.2.txt
+TLS 1.2: 2
+
 
 ```
 
