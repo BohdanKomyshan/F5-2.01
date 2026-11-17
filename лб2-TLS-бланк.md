@@ -300,8 +300,8 @@ Verify return code: 21 (unable to verify the first certificate)
 ```
 
 Вивід кроку 3.6:
-
 ```text
+
 nginx: the configuration file /lab/nginx.conf syntax is ok
 nginx: configuration file /lab/nginx.conf test is successful
 2026/11/17 18:48:41 [notice] 243#243: signal process started
@@ -336,42 +336,152 @@ protocol: TLSv1.3
 | Кількість сертифікатів, які надсилає сервер, у кроці 3.5 і в кроці 3.6 |у кроці 3.5 — 1; у кроці 3.6 — 2 |
 
 1. Хто і як перевірив, що ви контролюєте обидва імена? Вкажіть рядки виводу, які це підтверджують.
-
 Перевірку виконав ACME-сервер Pebble (10.53.0.10) методом HTTP-01, зчитавши токени з каталогу /.well-known/acme-challenge/ на нашому вебсервері з кодом 200. Це підтверджують рядки lego [status.cs-201-11.lab] The server validated our request і [www.cs-201-11.lab] The server validated our request та записи в access.log: 10.53.0.10 ... "GET /.well-known/acme-challenge/... HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)".
 
 2. Чому в кроці 3.5 перевірка не пройшла, хоча корінь центру сертифікації вказано в `--cacert`, а сертифікат виданий правильно?
-
 Сертифікат сервера підписаний проміжним ЦС (Pebble Intermediate CA 593abd), а не безпосередньо кореневим (Pebble Root CA 20f890). У кроці 3.5 сервер не надіслав проміжний сертифікат, тому клієнт не зміг побудувати ланцюжок довіри до кореня з --cacert і повернув Verify return code: 21 (unable to verify the first certificate).
 
 3. У виводі ланцюжка для сертифіката сервера вказано `id-ecPublicKey` і `RSA-SHA256`. Що означає кожне з цих значень і чому вони не суперечать одне одному?
-
 id-ecPublicKey, 256 (bit) — це алгоритм відкритого ключа самого сервера (ECDSA), а RSA-SHA256 — алгоритм, яким проміжний ЦС підписав цей сертифікат своїм RSA-ключем (rsaEncryption, 2048 (bit)). Вони не суперечать одне одному, бо стосуються ключів різних сторін: ключа сервера та підпису ЦС.
 
 4. Що станеться з перевіркою вашого сервера після перезапуску стенда і чому? Що в реальній інфраструктурі відповідає цій ситуації?
-
 Перевірка завершиться помилкою, оскільки Pebble під час кожного запуску генерує нові кореневий та проміжний ключі, через що старий сертифікат сервера втрачає чинність. У реальній інфраструктурі цьому відповідає ротація або компрометація/відкликання ключів центру сертифікації без перевипуску сертифікатів.
 ## Завдання 4. Діагностика несправностей
 
 Вивід кроку 4.1:
 
 ```text
-Перевірка завершиться помилкою, оскільки Pebble під час кожного запуску генерує нові кореневий та проміжний ключі, через що старий сертифікат сервера втрачає чинність. У реальній інфраструктурі цьому відповідає ротація або компрометація/відкликання ключів центру сертифікації без перевипуску сертифікатів.
+=== f1.cs-201-11.lab ===
+curl: (60) SSL: no alternative certificate subject name matches target host name 'f1.cs-201-11.lab'
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+Certificate chain
+ 0 s:CN = old.cs-201-11.lab
+   i:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Nov 11 06:58:02 2026 GMT; NotAfter: Feb  9 06:58:02 2027 GMT
+ 1 s:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   i:O = OPISM Lab, CN = OPISM Stand Root CA
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Nov 11 06:58:02 2026 GMT; NotAfter: Nov 10 06:58:02 2031 GMT
+---
+Verify return code: 0 (ok)
+subject=CN = old.cs-201-11.lab
+issuer=O = OPISM Lab, CN = OPISM Stand Intermediate CA
+notBefore=Nov 11 06:58:02 2026 GMT
+notAfter=Feb  9 06:58:02 2027 GMT
+X509v3 Subject Alternative Name: 
+    DNS:old.cs-201-11.lab
+
+=== f2.cs-201-11.lab ===
+curl: (60) SSL certificate problem: self-signed certificate
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+Certificate chain
+ 0 s:CN = f2.cs-201-11.lab
+   i:CN = f2.cs-201-11.lab
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Nov 11 06:58:02 2026 GMT; NotAfter: Feb  9 06:58:02 2027 GMT
+---
+Verify return code: 18 (self-signed certificate)
+subject=CN = f2.cs-201-11.lab
+issuer=CN = f2.cs-201-11.lab
+notBefore=Nov 11 06:58:02 2026 GMT
+notAfter=Feb  9 06:58:02 2027 GMT
+X509v3 Subject Alternative Name: 
+    DNS:f2.cs-201-11.lab
+
+=== f3.cs-201-11.lab ===
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+Certificate chain
+ 0 s:CN = f3.cs-201-11.lab
+   i:O = Foreign Org, CN = Foreign Intermediate CA
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Nov 11 06:58:02 2026 GMT; NotAfter: Feb  9 06:58:02 2027 GMT
+ 1 s:O = Foreign Org, CN = Foreign Intermediate CA
+   i:O = Foreign Org, CN = Foreign Root CA
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Nov 11 06:58:02 2026 GMT; NotAfter: Nov 10 06:58:02 2031 GMT
+---
+Verify return code: 20 (unable to get local issuer certificate)
+subject=CN = f3.cs-201-11.lab
+issuer=O = Foreign Org, CN = Foreign Intermediate CA
+notBefore=Nov 11 06:58:02 2026 GMT
+notAfter=Feb  9 06:58:02 2027 GMT
+X509v3 Subject Alternative Name: 
+    DNS:f3.cs-201-11.lab
+
+=== f4.cs-201-11.lab ===
+server: web, f4
+Certificate chain
+ 0 s:CN = f4.cs-201-11.lab
+   i:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Nov 11 06:58:02 2026 GMT; NotAfter: Feb  9 06:58:02 2027 GMT
+ 1 s:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   i:O = OPISM Lab, CN = OPISM Stand Root CA
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Nov 11 06:58:02 2026 GMT; NotAfter: Nov 10 06:58:02 2031 GMT
+---
+Verify return code: 0 (ok)
+subject=CN = f4.cs-201-11.lab
+issuer=O = OPISM Lab, CN = OPISM Stand Intermediate CA
+notBefore=Nov 11 06:58:02 2026 GMT
+notAfter=Feb  9 06:58:02 2027 GMT
+X509v3 Subject Alternative Name: 
+    DNS:f4.cs-201-11.lab
+
+=== f5.cs-201-11.lab ===
+curl: (60) SSL certificate problem: certificate has expired
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+Certificate chain
+ 0 s:CN = f5.cs-201-11.lab
+   i:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Apr 25 06:58:02 2026 GMT; NotAfter: Oct 22 06:58:02 2026 GMT
+ 1 s:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   i:O = OPISM Lab, CN = OPISM Stand Root CA
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Nov 11 06:58:02 2026 GMT; NotAfter: Nov 10 06:58:02 2031 GMT
+---
+Verify return code: 10 (certificate has expired)
+subject=CN = f5.cs-201-11.lab
+issuer=O = OPISM Lab, CN = OPISM Stand Intermediate CA
+notBefore=Apr 25 06:58:02 2026 GMT
+notAfter=Oct 22 06:58:02 2026 GMT
+X509v3 Subject Alternative Name: 
+    DNS:f5.cs-201-11.lab
 ```
 
 | Сервер | Помилка `curl` | `Verify return code` | Яка перевірка не пройшла | Рядок виводу, що це доводить | Що має змінити власник сервера |
 |---|---|---|---|---|---|
-| f1 | | | | | |
-| f2 | | | | | |
-| f3 | | | | | |
-| f4 | | | | | |
-| f5 | | | | | |
+| f1 | `no alternative certificate subject name matches target host name 'f1.cs-201-11.lab'` | `0 (ok)` | Перевірка відповідності імені хоста (SAN) | `DNS:old.cs-201-11.lab` (`s:CN = old.cs-201-11.lab`) | Перевипустити сертифікат із `DNS:f1.cs-201-11.lab` у полі SAN |
+| f2 | `self-signed certificate` | `18 (self-signed certificate)` | Перевірка підпису довіреним ЦС (самопідписаний) | `s:CN = f2.cs-201-11.lab` та `i:CN = f2.cs-201-11.lab` | Отримати сертифікат у довіреному ЦС стенда (`OPISM Stand Intermediate CA`) |
+| f3 | `unable to get local issuer certificate` | `20 (unable to get local issuer certificate)` | Перевірка довіри до кореневого ЦС (сторонній ЦС) | `i:O = Foreign Org, CN = Foreign Root CA` | Замінити сертифікат на виданий довіреним ЦС (`OPISM Stand Intermediate CA`) |
+| f4 | — (`server: web, f4`) | `0 (ok)` | Усі перевірки пройшли успішно | `Verify return code: 0 (ok)` та `DNS:f4.cs-201-11.lab` | Нічого (сервер налаштований правильно) |
+| f5 | `certificate has expired` | `10 (certificate has expired)` | Перевірка строку дії сертифіката | `notAfter=Oct 22 06:58:02 2026 GMT` | Перевипустити (оновити) сертифікат з актуальним терміном дії |
 
 1. Для сервера з помилкою `unable to get local issuer certificate` визначте, яка це несправність: сервер не надсилає проміжний сертифікат чи сертифікат виданий центром, якому клієнт не довіряє. Чим ці дві несправності відрізняються у виводі `openssl s_client`?
-
+Для сервера f3.cs-201-11.lab це несправність сертифіката від стороннього центру (Foreign Root CA), якому клієнт не довіряє. У виводі openssl s_client ці дві ситуації відрізняються довжиною ланцюжка та кодом повернення: коли сервер не надсилає проміжний сертифікат (як у кроці 3.5), у Certificate chain видно лише 1 сертифікат (0 s:...) і повертається код 21 (unable to verify the first certificate) (або 20 для першого елемента), а коли сертифікат виданий стороннім ЦС (f3), сервер надсилає повний ланцюжок із 2 сертифікатів (0 та 1 з видавцем Foreign Root CA) і повертається код 20 (unable to get local issuer certificate) на рівні проміжного ЦС.
 2. Якщо серед ваших серверів є сервер з невідповідним ім'ям, чому `openssl s_client` повертає для нього `Verify return code: 0 (ok)`, а `curl` повідомляє про помилку? Якщо такого сервера немає, дайте відповідь для загального випадку.
-
+Такий сервер є — це f1.cs-201-11.lab (сертифікат видано на DNS:old.cs-201-11.lab). Утиліта openssl s_client за замовчуванням (без ключа -verify_hostname) перевіряє лише криптографічну цілісність ланцюжка довіри до кореневого ЦС і термін дії, які у f1 є коректними (0 (ok)), тоді як curl додатково обов'язково звіряє цільове ім'я хоста в URL зі списком імен у розширенні SAN.
 3. Які з п'яти серверів відповіли б на запит `curl -k`? Що при цьому втрачається порівняно з `--cacert`?
-
+На запит curl -k успішно відповіли б усі п'ять серверів (f1–f5). При використанні -k (--insecure) повністю вимикається перевірка автентичності сертифіката (довіри до ЦС, строку дії та відповідності імені в SAN): трафік залишається зашифрованим, але втрачається автентифікація сервера, що робить з'єднання вразливим до атаки з підміною сертифіката.
 ## Завдання 5. Ціна нового з'єднання
 
 **Прогноз** (записати до вимірювання). Скільки RTT мине до завершення кожного етапу:
