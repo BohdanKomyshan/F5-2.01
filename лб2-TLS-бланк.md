@@ -235,31 +235,95 @@ TLS 1.2: 2
 Вивід кроків 3.1 і 3.2:
 
 ```text
+збережено /lab/tls/acme-root.crt
+subject=CN = Pebble Root CA 20f890
+notBefore=Nov 17 17:21:41 2026 GMT
+notAfter=Nov 17 17:21:41 2056 GMT
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.se/docs/sslcerts.html
 
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
 ```
 
 Вивід кроку 3.3 (останні рядки `lego` і рядки журналу nginx):
 
 ```text
-
+026/11/17 18:16:35 [INFO] [status.cs-201-11.lab] acme: Trying to solve HTTP-01
+2026/11/17 18:16:39 [INFO] [status.cs-201-11.lab] The server validated our request
+2026/11/17 18:16:39 [INFO] [www.cs-201-11.lab] acme: Trying to solve HTTP-01
+2026/11/17 18:16:45 [INFO] [www.cs-201-11.lab] The server validated our request
+2026/11/17 18:16:45 [INFO] [www.cs-201-11.lab, status.cs-201-11.lab] acme: Validations succeeded; requesting certificates
+2026/11/17 18:16:45 [INFO] Wait for certificate [timeout: 30s, interval: 500ms]
+2026/11/17 18:16:45 [INFO] [www.cs-201-11.lab] Server responded with a certificate.
+10.53.0.10 - - [17/Nov/2026:18:16:35 +0000] "GET /.well-known/acme-challenge/JNJLk_glyqJ4paHqltcEpF4MEJiIvjaPNnW7B4aSs9A HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [17/Nov/2026:18:16:35 +0000] "GET /.well-known/acme-challenge/JNJLk_glyqJ4paHqltcEpF4MEJiIvjaPNnW7B4aSs9A HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [17/Nov/2026:18:16:39 +0000] "GET /.well-known/acme-challenge/JiPZ4Uq5UujEoDl7XsASGiuwzHGDeSB99eHRT4o3NQY HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [17/Nov/2026:18:16:39 +0000] "GET /.well-known/acme-challenge/JiPZ4Uq5UujEoDl7XsASGiuwzHGDeSB99eHRT4o3NQY HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [17/Nov/2026:18:16:39 +0000] "GET /.well-known/acme-challenge/JiPZ4Uq5UujEoDl7XsASGiuwzHGDeSB99eHRT4o3NQY HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
 ```
 
 Вивід кроку 3.4:
 
 ```text
-
+subject=CN = www.cs-201-11.lab
+issuer=CN = Pebble Intermediate CA 593abd
+notBefore=Nov 17 18:16:45 2026 GMT
+notAfter=Nov 17 18:16:44 2031 GMT
+serial=6DFA2850787BD2DE
+X509v3 Subject Alternative Name: 
+    DNS:www.cs-201-11.lab, DNS:status.cs-201-11.lab
+subject=CN = Pebble Intermediate CA 593abd
+issuer=CN = Pebble Root CA 20f890
 ```
 
 Вивід кроку 3.5:
 
 ```text
+nginx: the configuration file /lab/nginx.conf syntax is ok
+nginx: configuration file /lab/nginx.conf test is successful
+2026/11/17 18:44:52 [notice] 221#221: signal process started
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.se/docs/sslcerts.html
 
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+Certificate chain
+ 0 s:CN = www.cs-201-11.lab
+   i:CN = Pebble Intermediate CA 593abd
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Nov 17 18:16:45 2026 GMT; NotAfter: Nov 17 18:16:44 2031 GMT
+---
+Verify return code: 21 (unable to verify the first certificate)
 ```
 
 Вивід кроку 3.6:
 
 ```text
-
+nginx: the configuration file /lab/nginx.conf syntax is ok
+nginx: configuration file /lab/nginx.conf test is successful
+2026/11/17 18:48:41 [notice] 243#243: signal process started
+server: cs-201-11 (https)
+Host: www.cs-201-11.lab
+SNI: www.cs-201-11.lab
+protocol: TLSv1.3
+Certificate chain
+ 0 s:CN = www.cs-201-11.lab
+   i:CN = Pebble Intermediate CA 593abd
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Nov 17 18:16:45 2026 GMT; NotAfter: Nov 17 18:16:44 2031 GMT
+ 1 s:CN = Pebble Intermediate CA 593abd
+   i:CN = Pebble Root CA 20f890
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Nov 17 17:21:41 2026 GMT; NotAfter: Nov 17 17:21:41 2056 GMT
+---
+Verify return code: 0 (ok)
+server: cs-201-11 (https)
+Host: status.cs-201-11.lab
+SNI: status.cs-201-11.lab
+protocol: TLSv1.3
 ```
 
 | Параметр | Значення |
